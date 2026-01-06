@@ -1,33 +1,21 @@
-import { useState } from "react";
-import Success from "./Success.jsx";
+import { useState } from 'react';
+import Success from './Success.jsx'; // Import the new component
 
 export default function WaitlistForm({ type }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const formName = `waitlist-${type}`;
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
     const formData = new FormData(e.target);
-
-    try {
-      const response = await fetch("/", {
-        method: "POST",
-        body: new URLSearchParams(formData).toString(),
-      });
-
-      if (!response.ok) {
-        throw new Error("Netlify form submission failed");
-      }
-
-      setSubmitted(true);
-      setEmail("");
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Please try again.");
-    }
+    
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData).toString(),
+    })
+      .then(() => setSubmitted(true))
+      .catch((error) => alert("Submission failed: " + error));
   };
 
   if (submitted) {
@@ -35,39 +23,26 @@ export default function WaitlistForm({ type }) {
   }
 
   return (
-    <form
-      name={formName}
-      method="POST"
+    <form 
+      name={`waitlist-${type}`} 
+      method="POST" 
       data-netlify="true"
-      data-netlify-honeypot="bot-field"
       onSubmit={handleSubmit}
-      className="flex w-full max-w-md flex-col gap-3 sm:flex-row"
+      className="flex flex-col sm:flex-row gap-2 w-full max-w-md"
     >
-      {/* Netlify required hidden input */}
-      <input type="hidden" name="form-name" value={formName} />
-
-      {/* Honeypot */}
-      <input type="hidden" name="bot-field" />
-
+      <input type="hidden" name="form-name" value={`waitlist-${type}`} />
       <input
         type="email"
         name="email"
+        placeholder={type === 'chef' ? "Enter chef email..." : "Enter your email..."}
+        className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary bg-white text-black"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder={
-          type === "chef"
-            ? "Enter chef email address"
-            : "Enter your email address"
-        }
-        className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900
-                   focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
-
       <button
         type="submit"
-        className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white
-                   transition-colors hover:bg-red-700"
+        className="bg-primary hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors cursor-pointer"
       >
         Join Waitlist
       </button>
