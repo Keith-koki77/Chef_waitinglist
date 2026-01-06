@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #DD3131;
+  --color-accent: #F4CD2E;
+  --color-off-white: #F4F5F6;
+  
+  /* Adding a dark shade for text contrast */
+  --color-q-dark: #1a1a1a;
+}
+
+body {
+  @apply bg-off-white text-q-dark;
+}
