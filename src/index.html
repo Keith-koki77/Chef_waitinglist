@@ -9,12 +9,28 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
-    <form name="waitlist-user" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <!-- Netlify Ghost Form: User Waitlist -->
+    <form
+      name="waitlist-user"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="waitlist-user" />
       <input type="text" name="bot-field" />
       <input type="email" name="email" />
     </form>
 
-    <form name="waitlist-chef" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <!-- Netlify Ghost Form: Chef Waitlist -->
+    <form
+      name="waitlist-chef"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="waitlist-chef" />
       <input type="text" name="bot-field" />
       <input type="email" name="email" />
     </form>
