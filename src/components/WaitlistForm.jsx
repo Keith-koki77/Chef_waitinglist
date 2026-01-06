@@ -8,30 +8,31 @@ export default function WaitlistForm({ type }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    const formName = `waitlist-${type}`;
-    const formData = new FormData(e.target);
+    const form = e.target;
+    const formData = new FormData(form);
     
-    // Explicitly set the form-name for Netlify routing
-    formData.set("form-name", formName);
-
+    // This tells Netlify which 'Ghost Form' to match this data to
+    formData.append("form-name", form.getAttribute("name"));
+  
     fetch("/", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(formData).toString(),
     })
-      .then((res) => {
-        if (res.ok) {
+      .then((response) => {
+        if (response.ok) {
           setSubmitted(true);
         } else {
-          throw new Error("Network response was not ok");
+          // This is likely what triggered your "Oops" alert
+          throw new Error("Form submission failed at server");
         }
       })
       .catch((error) => {
-        console.error("Submission error:", error);
+        console.error(error);
         alert("Oops! Something went wrong. Please try again.");
       });
   };
-
+  
   if (submitted) {
     return <Success onBack={() => setSubmitted(false)} />;
   }
