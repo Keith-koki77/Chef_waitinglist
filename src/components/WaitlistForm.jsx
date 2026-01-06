@@ -7,15 +7,29 @@ export default function WaitlistForm({ type }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    const formName = `waitlist-${type}`;
     const formData = new FormData(e.target);
     
+    // Explicitly set the form-name for Netlify routing
+    formData.set("form-name", formName);
+
     fetch("/", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(formData).toString(),
     })
-      .then(() => setSubmitted(true))
-      .catch((error) => alert("Submission failed: " + error));
+      .then((res) => {
+        if (res.ok) {
+          setSubmitted(true);
+        } else {
+          throw new Error("Network response was not ok");
+        }
+      })
+      .catch((error) => {
+        console.error("Submission error:", error);
+        alert("Oops! Something went wrong. Please try again.");
+      });
   };
 
   if (submitted) {
@@ -27,10 +41,18 @@ export default function WaitlistForm({ type }) {
       name={`waitlist-${type}`} 
       method="POST" 
       data-netlify="true"
+      data-netlify-honeypot="bot-field"
       onSubmit={handleSubmit}
       className="flex flex-col sm:flex-row gap-2 w-full max-w-md"
     >
+      {/* Required for Netlify + React integration */}
       <input type="hidden" name="form-name" value={`waitlist-${type}`} />
+      
+      {/* Hidden honeypot field for bot protection */}
+      <p className="hidden">
+        <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
+      </p>
+
       <input
         type="email"
         name="email"
@@ -42,7 +64,7 @@ export default function WaitlistForm({ type }) {
       />
       <button
         type="submit"
-        className="bg-primary hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors cursor-pointer"
+        className="bg-primary hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all cursor-pointer"
       >
         Join Waitlist
       </button>
