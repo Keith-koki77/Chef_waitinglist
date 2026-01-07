@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Hero from './components/Hero';
 import Features from './components/Features';
 import HowItWorks from './components/HowItWorks';
@@ -5,9 +6,13 @@ import JoinWaitlist from './components/JoinWaitlist';
 import Footer from './components/Footer';
 
 function App() {
+
+  useEffect(() => {
+    document.title = "Qavaeat | Effortless Meal Planning";
+  }, []);
+
   return (
     <div className="antialiased">
-      {/* Navbar Simple */}
       <nav className="flex items-center justify-between px-10 py-6 bg-off-white border-b border-gray-200">
         <div className="text-[1.6rem] font-extrabold text-primary tracking-tight">
           QAVAEAT
