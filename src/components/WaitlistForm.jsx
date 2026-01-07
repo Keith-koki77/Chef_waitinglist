@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Success from './Success.jsx';
+import ReactGA from "react-ga4"; // Added GA4 import
 
 export default function WaitlistForm({ type }) {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export default function WaitlistForm({ type }) {
     e.preventDefault();
     setLoading(true);
 
+    // 1. Insert data into Supabase
     const { error } = await supabase
       .from('waitlist')
       .insert([{ email: email, type: type }]);
@@ -19,8 +21,16 @@ export default function WaitlistForm({ type }) {
       console.error(error);
       alert("Error joining waitlist: " + error.message);
     } else {
+      // 2. Fire Google Analytics Event on Success
+      ReactGA.event({
+        category: "Conversion",
+        action: "Waitlist Signup",
+        label: type, // Tracks whether it was 'chef' or 'user'
+      });
+
       setSubmitted(true);
     }
+    
     setLoading(false);
   };
 
