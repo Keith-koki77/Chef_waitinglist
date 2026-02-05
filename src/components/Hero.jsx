@@ -1,24 +1,19 @@
-export default function Hero() {
-  // Smooth scroll function
-  const scrollToWaitlist = () => {
-    const element = document.getElementById('join-waitlist');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+import { Link } from 'react-router-dom';
 
+export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-off-white py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
+          
           {/* Left Content */}
           <div className="z-10">
-            <p className="text-primary font-bold tracking-widest text-sm mb-4 uppercase">
+            <p className="text-[#DD3131] font-bold tracking-widest text-sm mb-4 uppercase">
               Automate your meals. Maximize your budget.
             </p>
             <h1 className="text-5xl lg:text-7xl font-black text-q-dark leading-[1.1] mb-6">
               Effortless Meal <br />
-              <span className="text-primary">Planning.</span>
+              <span className="text-[#DD3131]">Planning.</span>
               <br />
               Smart Financial Living
             </h1>
@@ -30,30 +25,30 @@ export default function Hero() {
             {/* Icon Features */}
             <div className="flex flex-wrap gap-6 mb-10 text-sm font-semibold text-gray-700">
               <div className="flex items-center gap-2">
-                <span className="text-primary">📅</span> Pre-Planned Meals
+                <span className="text-[#DD3131]">📅</span> Pre-Planned Meals
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-primary">💵</span> Budget Optimization
+                <span className="text-[#DD3131]">💵</span> Budget Optimization
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-primary">➕</span> Curated Local Chefs
+                <span className="text-[#DD3131]">➕</span> Curated Local Chefs
               </div>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">
-              <button
-                onClick={scrollToWaitlist}
-                className="bg-primary hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full transition-all shadow-lg hover:shadow-primary/30 cursor-pointer"
+              <Link
+                to="/plan"
+                className="bg-[#DD3131] hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full transition-all shadow-lg hover:shadow-red-200 cursor-pointer text-center"
               >
                 Start Your Meal Plan
-              </button>
-              <button
-                onClick={scrollToWaitlist}
-                className="bg-white border-2 border-gray-100 hover:border-accent text-q-dark font-bold py-4 px-8 rounded-full transition-all cursor-pointer"
+              </Link>
+              <Link
+                to="/partner"
+                className="bg-white border-2 border-gray-100 hover:border-[#F4CD2E] text-q-dark font-bold py-4 px-10 rounded-full transition-all cursor-pointer text-center"
               >
                 Join as Partner Chef
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -72,15 +67,14 @@ export default function Hero() {
                     </div>
                   </div>
 
-                  {/* App Screen */}
+                  {/* App Screen Content */}
                   <div className="h-full w-full px-4 pb-6 pt-3 flex flex-col gap-4 bg-[#121417]">
-                    {/* App Header */}
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-xs font-extrabold text-white">
+                      <div className="w-9 h-9 bg-[#DD3131] rounded-full flex items-center justify-center text-xs font-extrabold text-white">
                         Q
                       </div>
                       <div className="leading-tight">
-                        <p className="text-white text-sm font-semibold">
+                        <p className="text-white text-sm font-semibold uppercase tracking-wider">
                           QAVAEAT
                         </p>
                         <p className="text-gray-500 text-[10px]">
@@ -92,34 +86,36 @@ export default function Hero() {
                     {/* Budget Card */}
                     <div className="bg-[#1E2126] p-4 rounded-2xl border border-gray-800">
                       <p className="text-gray-400 text-[10px] uppercase font-semibold tracking-wider">
-                        Weekly Budget
+                        Weekly Savings
                       </p>
                       <div className="flex items-end justify-between mt-2">
                         <p className="text-white text-2xl font-extrabold">
                           KES 3,000
                         </p>
-                        <p className="text-xs text-green-400 font-medium">
-                          On track
+                        <p className="text-xs text-[#F4CD2E] font-medium">
+                          Saved
                         </p>
                       </div>
-
-                      {/* Progress Bar */}
                       <div className="mt-3 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                        <div className="h-full w-[60%] bg-primary rounded-full" />
+                        <div className="h-full w-[60%] bg-[#F4CD2E] rounded-full" />
                       </div>
                     </div>
 
-                    {/* Visual Placeholder / Journey */}
+                    {/* Meal Item Card */}
+                    <div className="bg-[#1E2126] p-3 rounded-2xl border border-gray-800 flex items-center gap-3">
+                       <div className="w-10 h-10 bg-gray-700 rounded-lg"></div>
+                       <div>
+                         <p className="text-white text-xs font-bold">Chef Amina's Pilau</p>
+                         <p className="text-gray-500 text-[10px]">Mon • Wed • Fri</p>
+                       </div>
+                    </div>
+
                     <div className="flex-1 bg-[#181B20] rounded-2xl border border-dashed border-gray-700 flex flex-col items-center justify-center gap-2 text-center px-6">
-                      <p className="text-gray-400 text-xs font-medium">
-                        Visualizing your
-                      </p>
-                      <p className="text-white text-sm font-semibold">
-                        Culinary Journey
+                      <p className="text-[#F4CD2E] text-sm font-bold">
+                        Order Confirmed!
                       </p>
                       <p className="text-gray-500 text-[11px] leading-relaxed">
-                        Track meals, budgets, and progress effortlessly in one
-                        place.
+                        Your chef is preparing your menu for the upcoming week.
                       </p>
                     </div>
                   </div>
