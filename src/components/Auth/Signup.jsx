@@ -12,7 +12,6 @@ const Signup = () => {
     const [errorMsg, setErrorMsg] = useState(null);
     const navigate = useNavigate();
 
-    // Force role to be either 'chef' or 'foodie'
     const finalRole = role === 'chef' ? 'chef' : 'foodie';
 
     const handleSignup = async (e) => {
@@ -20,15 +19,14 @@ const Signup = () => {
         setLoading(true);
         setErrorMsg(null);
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: {
                     full_name: fullName,
-                    role: finalRole // CRITICAL: This fuels the DB Trigger
+                    role: finalRole 
                 },
-                emailRedirectTo: `${window.location.origin}/login`
             }
         });
 
@@ -36,15 +34,18 @@ const Signup = () => {
             setErrorMsg(error.message);
             setLoading(false);
         } else {
-            setIsSuccess(true);
-            setLoading(false);
+            if (finalRole === 'chef') {
+                navigate('/chef-onboarding');
+            } else {
+                navigate('/login');
+            }
         }
     };
 
     if (isSuccess) {
         return (
             <div className="min-h-[90vh] flex items-center justify-center p-6">
-                <div className="max-w-md w-full p-12 rounded-[3.5rem] bg-white border-2 border-black text-center shadow-2xl">
+                <div className="max-w-md w-full p-12 rounded-[3.5rem] bg-white border-2 border-black text-center shadow-2xl animate-in fade-in zoom-in duration-300">
                     <div className="text-6xl mb-6">📩</div>
                     <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4">Check Your Email</h2>
                     <p className="text-gray-500 font-bold text-sm uppercase leading-relaxed mb-8">

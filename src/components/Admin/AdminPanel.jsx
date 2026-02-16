@@ -1,152 +1,173 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { 
+  CheckBadgeIcon, 
+  ClockIcon, 
+  UserCircleIcon, 
+  MapPinIcon, 
+  ChevronRightIcon, 
+  XMarkIcon 
+} from '@heroicons/react/24/outline';
 
-const AdminPanel = () => {
-    const [pendingChefs, setPendingChefs] = useState([]);
-    const [stats, setStats] = useState({ totalUsers: 0, totalRevenue: 0 });
-    const [loading, setLoading] = useState(true);
+const AdminApproval = () => {
+  const [chefs, setChefs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
+  const [selectedChef, setSelectedChef] = useState(null); // For the Review Modal
 
-    useEffect(() => {
-        fetchAdminData();
-    }, []);
+  useEffect(() => {
+    fetchChefs();
+  }, []);
 
-    const fetchAdminData = async () => {
-        setLoading(true);
-        try {
-            // 1. Fetch Chefs awaiting approval
-            const { data: chefs, error: chefError } = await supabase
-                .from('chefs')
-                .select('*')
-                .eq('is_approved', false)
-                .order('created_at', { ascending: false });
+  const fetchChefs = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('chefs').select('*');
+    if (!error) setChefs(data || []);
+    setLoading(false);
+  };
 
-            if (chefError) throw chefError;
+  const updateChefStatus = async (chefId, status) => {
+    const { error } = await supabase
+      .from('chefs')
+      .update({ is_approved: status, is_verified: status })
+      .eq('id', chefId)
+      .select();
 
-            // 2. Fetch Total User Count
-            const { count: userCount, error: userError } = await supabase
-                .from('profiles')
-                .select('*', { count: 'exact', head: true });
+    if (!error) {
+      setChefs(chefs.map(c => c.id === chefId ? { ...c, is_approved: status } : c));
+      setSelectedChef(null);
+    }
+  };
 
-            if (userError) throw userError;
+  const filteredChefs = chefs.filter(c => activeTab === 'pending' ? !c.is_approved : c.is_approved);
 
-            // 3. Fetch System Revenue (Sum of amount_paid from orders)
-            const { data: orders, error: orderError } = await supabase
-                .from('orders')
-                .select('amount_paid');
-
-            if (orderError) throw orderError;
-
-            const revenue = orders?.reduce((acc, curr) => acc + Number(curr.amount_paid || 0), 0) || 0;
-
-            setPendingChefs(chefs || []);
-            setStats({ totalUsers: userCount || 0, totalRevenue: revenue });
-        } catch (error) {
-            console.error("Admin Data Fetch Error:", error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const approveChef = async (chefId) => {
-        const { error } = await supabase
-            .from('chefs')
-            .update({ is_approved: true })
-            .eq('id', chefId);
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] p-8 font-sans text-black">
+      <div className="max-w-6xl mx-auto">
         
-        if (error) {
-            alert("Error approving chef: " + error.message);
-        } else {
-            alert("KITCHEN AUTHORIZED: Chef is now live in the ecosystem.");
-            // Filter out the approved chef from local state immediately for snappy UI
-            setPendingChefs(prev => prev.filter(c => c.id !== chefId));
-            // Refresh stats to reflect any changes if necessary
-            fetchAdminData();
-        }
-    };
-
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-white">
-            <div className="flex flex-col items-center">
-                <div className="w-16 h-16 border-8 border-gray-100 border-t-black rounded-full animate-spin"></div>
-                <p className="mt-6 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">Accessing Command Center...</p>
+        {/* HEADER & TABS */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <h1 className="text-6xl font-black uppercase italic tracking-tighter">
+              Admin <span className="text-[#DD3131]">Portal</span>
+            </h1>
+            <div className="flex gap-4 mt-6">
+              <button 
+                onClick={() => setActiveTab('pending')}
+                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pending' ? 'bg-black text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-100'}`}
+              >
+                Pending ({chefs.filter(c => !c.is_approved).length})
+              </button>
+              <button 
+                onClick={() => setActiveTab('approved')}
+                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'approved' ? 'bg-black text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-100'}`}
+              >
+                Approved ({chefs.filter(c => c.is_approved).length})
+              </button>
             </div>
-        </div>
-    );
+          </div>
+        </header>
 
-    return (
-        <div className="p-8 max-w-7xl mx-auto min-h-screen">
-            <header className="mb-12 border-b-8 border-black pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div>
-                    <h1 className="text-7xl font-black uppercase italic tracking-tighter leading-none">COMMAND <span className="text-[#DD3131]">CENTER</span></h1>
-                    <p className="text-gray-400 font-black uppercase text-xs tracking-[0.5em] mt-4">Qavaeat Ecosystem Authority</p>
-                </div>
-                <div className="text-right bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                    <p className="text-[10px] font-black uppercase text-gray-400 mb-1">Total System Volume</p>
-                    <h2 className="text-5xl font-black tracking-tighter text-black">
-                        ${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </h2>
-                </div>
-            </header>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                <div className="bg-black text-white p-10 rounded-[3rem] shadow-xl">
-                    <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Profiles</p>
-                    <h3 className="text-6xl font-black mt-2 tracking-tighter">{stats.totalUsers}</h3>
-                </div>
-                <div className="bg-white border-4 border-black p-10 rounded-[3rem]">
-                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Pending Approvals</p>
-                    <h3 className="text-6xl font-black mt-2 tracking-tighter text-[#DD3131]">{pendingChefs.length}</h3>
-                </div>
-                {/* Visual Filler for Admin aesthetic */}
-                <div className="lg:col-span-2 bg-[#DD3131] p-10 rounded-[3rem] flex items-center justify-center text-white italic font-black text-2xl uppercase text-center leading-tight">
-                    "Decentralizing the Kitchen, One Verification at a Time."
-                </div>
+        {/* LISTING */}
+        <div className="grid gap-4">
+          {loading ? (
+             <div className="p-20 text-center font-black uppercase animate-pulse">Scanning Kitchens...</div>
+          ) : filteredChefs.length === 0 ? (
+            <div className="bg-white p-20 rounded-[3rem] text-center border-2 border-dashed border-gray-200 text-gray-400 font-bold uppercase italic">
+               No {activeTab} chefs found.
             </div>
+          ) : (
+            filteredChefs.map(chef => (
+              <div 
+                key={chef.id}
+                onClick={() => setSelectedChef(chef)}
+                className="group bg-white p-6 rounded-[2.5rem] border border-gray-100 flex items-center justify-between cursor-pointer hover:border-black transition-all"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl">
+                    {chef.profile_photo_url ? <img src={chef.profile_photo_url} className="w-full h-full object-cover rounded-2xl" /> : "👨‍🍳"}
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black uppercase italic tracking-tighter">{chef.business_name}</h4>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                      <MapPinIcon className="w-3 h-3" /> {chef.location || "Location not set"}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRightIcon className="w-6 h-6 text-gray-300 group-hover:text-black group-hover:translate-x-2 transition-all" />
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
-            <section>
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-3xl font-black uppercase italic tracking-tighter">Pending <span className="text-[#DD3131]">Applications</span></h2>
-                    <button onClick={fetchAdminData} className="text-[10px] font-black uppercase border-b-2 border-black pb-1 hover:text-[#DD3131] transition-colors">Refresh Feed</button>
+      {/* MODAL: CHEF DETAILS REVIEW */}
+      {selectedChef && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-end bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-2xl h-full rounded-[4rem] shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-500">
+            <div className="p-12 relative">
+              <button 
+                onClick={() => setSelectedChef(null)}
+                className="absolute top-8 right-8 p-3 bg-gray-100 rounded-full hover:bg-black hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#DD3131]">Reviewing Application</span>
+              <h2 className="text-5xl font-black uppercase italic tracking-tighter mt-4 mb-8">
+                {selectedChef.business_name}
+              </h2>
+
+              <div className="space-y-8">
+                {/* BIO */}
+                <section>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Chef Biography</label>
+                  <p className="text-lg font-medium text-gray-700 leading-relaxed italic">
+                    "{selectedChef.bio || "No biography submitted yet."}"
+                  </p>
+                </section>
+
+                {/* DETAILS GRID */}
+                <div className="grid grid-cols-2 gap-6 bg-gray-50 p-8 rounded-[2.5rem]">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Experience</label>
+                    <p className="font-bold">{selectedChef.years_experience} Years</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Cuisine Types</label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {selectedChef.food_types?.map(type => (
+                        <span key={type} className="bg-white px-3 py-1 rounded-lg text-[9px] font-black uppercase border border-gray-100">{type}</span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {pendingChefs.length === 0 ? (
-                    <div className="p-24 bg-gray-50 rounded-[4rem] text-center border-4 border-dashed border-gray-200">
-                        <p className="font-black uppercase text-gray-300 tracking-[0.3em] text-xl">All Kitchens Operational</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-6">
-                        {pendingChefs.map(chef => (
-                            <div key={chef.id} className="group flex flex-col md:flex-row justify-between items-center p-10 bg-white border-2 border-gray-100 rounded-[3rem] hover:border-black transition-all duration-500 shadow-sm hover:shadow-2xl">
-                                <div className="max-w-xl">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h4 className="text-3xl font-black uppercase italic tracking-tight">{chef.business_name}</h4>
-                                        <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">Awaiting Review</span>
-                                    </div>
-                                    <p className="text-[#DD3131] font-black text-[10px] uppercase tracking-widest flex items-center gap-1 mb-4">
-                                        📍 {chef.location}
-                                    </p>
-                                    <p className="text-gray-500 text-sm font-medium leading-relaxed italic border-l-4 border-gray-100 pl-4">
-                                        "{chef.bio || "No bio submitted."}"
-                                    </p>
-                                </div>
-                                <div className="mt-8 md:mt-0 flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                                    <button 
-                                        onClick={() => approveChef(chef.id)}
-                                        className="bg-black text-white px-12 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-green-600 transition-all hover:scale-105"
-                                    >
-                                        Approve Kitchen
-                                    </button>
-                                    <button className="border-2 border-gray-100 text-gray-400 px-12 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:border-red-500 hover:text-red-500 transition-all">
-                                        Deny
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
+                {/* ACTION BUTTONS */}
+                <div className="pt-8 flex gap-4">
+                  {!selectedChef.is_approved ? (
+                    <button 
+                      onClick={() => updateChefStatus(selectedChef.id, true)}
+                      className="flex-1 bg-black text-white py-6 rounded-3xl font-black uppercase tracking-widest hover:bg-[#DD3131] transition-all"
+                    >
+                      Approve & Go Live
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => updateChefStatus(selectedChef.id, false)}
+                      className="flex-1 border-2 border-black py-6 rounded-3xl font-black uppercase tracking-widest hover:bg-red-500 hover:border-red-500 hover:text-white transition-all"
+                    >
+                      Revoke Access
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
-export default AdminPanel;
+export default AdminApproval;

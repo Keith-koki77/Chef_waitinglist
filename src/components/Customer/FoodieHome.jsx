@@ -1,68 +1,155 @@
-import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
+import ChefCard from "./ChefCard"; 
+import { 
+  MagnifyingGlassIcon, 
+  AdjustmentsHorizontalIcon, 
+  FireIcon, 
+  CalendarDaysIcon 
+} from "@heroicons/react/24/outline";
 
 const FoodieHome = () => {
-    const [chefs, setChefs] = useState([]);
-    const [search, setSearch] = useState('');
-    const [loading, setLoading] = useState(true);
+  const [chefs, setChefs] = useState([]);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [viewMode, setViewMode] = useState("kitchens"); // 'kitchens' or 'plans'
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchChefs();
-    }, []);
+  const categories = ["All", "Swahili", "Vegan", "Keto", "Grill", "Pastry", "Healthy"];
 
-    const fetchChefs = async () => {
-        const { data, error } = await supabase
-            .from('chefs')
-            .select('*')
-            .eq('is_approved', true); // Only show verified kitchens
-        
-        if (!error) setChefs(data);
-        setLoading(false);
-    };
+  useEffect(() => {
+    fetchChefs();
+  }, []);
 
-    const filteredChefs = chefs.filter(chef => 
-        chef.location.toLowerCase().includes(search.toLowerCase()) ||
-        chef.business_name.toLowerCase().includes(search.toLowerCase())
-    );
+  const fetchChefs = async () => {
+    try {
+      setLoading(true);
+      // Fetching is_approved chefs (matching your Dashboard logic)
+      const { data, error } = await supabase
+        .from("chefs")
+        .select("*")
+        .eq("is_approved", true); 
 
-    return (
-        <div className="p-8 max-w-7xl mx-auto">
-            <header className="mb-12">
-                <h1 className="text-6xl font-black uppercase italic tracking-tighter leading-none">
-                    EXPLORE <span className="text-[#DD3131]">KITCHENS</span>
-                </h1>
-                <div className="mt-8 relative max-w-xl">
-                    <input 
-                        type="text" 
-                        placeholder="Search by city or cuisine..." 
-                        className="w-full p-6 bg-gray-100 rounded-3xl outline-none font-bold border-2 border-transparent focus:border-black transition-all"
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                    <span className="absolute right-6 top-1/2 -translate-y-1/2 opacity-30 font-black">SEARCH</span>
-                </div>
-            </header>
+      if (error) throw error;
+      setChefs(data || []);
+    } catch (err) {
+      console.error("Error loading kitchens:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            {loading ? (
-                <div className="animate-pulse space-y-4">
-                    {[1,2,3].map(i => <div key={i} className="h-48 bg-gray-100 rounded-[3rem]"></div>)}
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredChefs.map(chef => (
-                        <Link to={`/explore/${chef.id}`} key={chef.id} 
-                              className="group bg-white border-2 border-gray-100 p-8 rounded-[3rem] hover:border-black transition-all shadow-sm hover:shadow-xl">
-                            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🍳</div>
-                            <h3 className="text-2xl font-black uppercase italic tracking-tight">{chef.business_name}</h3>
-                            <p className="text-[#DD3131] font-black text-[10px] uppercase tracking-widest mt-2">📍 {chef.location}</p>
-                            <p className="text-gray-400 text-sm mt-4 font-medium line-clamp-2">{chef.bio}</p>
-                            <div className="mt-6 inline-block font-black uppercase text-[10px] tracking-widest border-b-2 border-black pb-1">View Menu →</div>
-                        </Link>
-                    ))}
-                </div>
-            )}
+  // FIX: Added safety checks to prevent 'toLowerCase' on null values
+  const filteredChefs = chefs.filter((chef) => {
+    const chefName = (chef.business_name || "").toLowerCase();
+    const chefLocation = (chef.location || "").toLowerCase();
+    const searchTerm = search.toLowerCase();
+
+    const matchesSearch = 
+      chefLocation.includes(searchTerm) || 
+      chefName.includes(searchTerm);
+    
+    // Safety check for food_types array
+    const matchesCategory = activeCategory === "All" || 
+      chef.food_types?.some(t => t?.toLowerCase() === activeCategory.toLowerCase());
+
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* 1. HERO SEARCH SECTION */}
+      <section className="bg-black pt-20 pb-32 px-8 rounded-b-[5rem] mb-[-4rem] relative z-10 shadow-2xl">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+            <div>
+              <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.85] text-white">
+                Find Your <br />
+                <span className="text-[#DD3131]">Private Chef</span>
+              </h1>
+              <p className="text-gray-400 font-bold uppercase text-xs tracking-[0.4em] mt-6 ml-2">
+                Curated Kitchens • Verified Professionals
+              </p>
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex bg-white/10 p-2 rounded-3xl backdrop-blur-md border border-white/10">
+              <button 
+                onClick={() => setViewMode('kitchens')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase text-[10px] transition-all ${viewMode === 'kitchens' ? 'bg-white text-black shadow-xl' : 'text-white hover:bg-white/5'}`}
+              >
+                <FireIcon className="w-4 h-4" /> Daily Meals
+              </button>
+              <button 
+                onClick={() => setViewMode('plans')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase text-[10px] transition-all ${viewMode === 'plans' ? 'bg-white text-black shadow-xl' : 'text-white hover:bg-white/5'}`}
+              >
+                <CalendarDaysIcon className="w-4 h-4" /> Weekly Plans
+              </button>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative group max-w-2xl">
+            <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-[#DD3131] transition-colors" />
+            <input
+              type="text"
+              placeholder="Search by neighborhood, chef name, or cuisine..."
+              className="w-full pl-16 pr-8 py-8 bg-white rounded-[2.5rem] outline-none font-bold text-xl placeholder:text-gray-300 shadow-2xl focus:ring-4 focus:ring-[#DD3131]/20 transition-all text-black"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
-    );
+      </section>
+
+      {/* 2. CATEGORY QUICK FILTERS */}
+      <section className="relative z-20 max-w-7xl mx-auto px-8 mb-16">
+        <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="bg-black text-white p-4 rounded-2xl shrink-0">
+            <AdjustmentsHorizontalIcon className="w-6 h-6" />
+          </div>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest whitespace-nowrap transition-all border-2 ${
+                activeCategory === cat 
+                  ? "bg-[#DD3131] border-[#DD3131] text-white shadow-lg shadow-[#DD3131]/30 translate-y-[-2px]" 
+                  : "bg-white border-gray-100 text-gray-400 hover:border-black hover:text-black"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. GRID SECTION */}
+      <main className="max-w-7xl mx-auto px-8 pb-32">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="aspect-[4/5] bg-gray-50 animate-pulse rounded-[4rem]" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {filteredChefs.length > 0 ? (
+              filteredChefs.map((chef) => (
+                <ChefCard key={chef.id} chef={chef} />
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center">
+                <p className="text-4xl font-black uppercase italic text-gray-200">
+                  No kitchens found in this sector
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
 };
 
 export default FoodieHome;

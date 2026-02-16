@@ -17,48 +17,55 @@ const Login = () => {
         setError(null);
 
         try {
-            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            // 1. AUTHENTICATE WITH SUPABASE
+            const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
             if (authError) throw authError;
-            const user = authData.user;
 
-            // 1. Check for Admin first
+            // 2. ADMIN GATE
             if (user.email === ADMIN_EMAIL) {
-                return navigate('/admin-approval');
+                return navigate("/admin-approval");
             }
 
-            // 2. Fetch the Role from the public.profiles table
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
+            // 3. GET ROLE FROM METADATA
+            const role = user.user_metadata?.role;
 
-            if (profileError) throw new Error("Could not verify user role.");
-
-            // 3. Diversified Redirection Logic
-            if (profile.role === 'chef') {
-                // Check if they have finished onboarding
-                const { data: chefRecord } = await supabase
-                    .from('chefs')
-                    .select('id')
-                    .eq('user_id', user.id)
+            if (role === "chef") {
+                // FETCH CHEF RECORD
+                const { data: chef, error: chefError } = await supabase
+                    .from("chefs")
+                    .select("*")
+                    .eq("id", user.id) // Matches Clean Slate SQL Primary Key
                     .maybeSingle();
 
-                if (chefRecord) {
-                    navigate(`/chef/dashboard/${chefRecord.id}`);
-                } else {
-                    navigate('/chef-onboarding');
+                console.log("Chef Debug Info:", { chef, userId: user.id });
+
+                // Check if the record exists and has business data
+                if (!chef || !chef.business_name) {
+                    navigate("/chef-onboarding");
+                    return;
                 }
+
+                // CHECK APPROVAL STATUS (Explicitly check for true)
+                if (chef.is_approved === true) {
+                    navigate(`/chef/dashboard/${chef.id}`);
+                } else {
+                    // KICK OUT AND CLEAR SESSION
+                    await supabase.auth.signOut();
+                    throw new Error("ACCESS DENIED: Your account is currently awaiting admin approval.");
+                }
+            } else if (role === "foodie") {
+                navigate("/foodie-home");
             } else {
-                // It's a Foodie
-                navigate('/foodie-home');
+                // If no role is found in metadata, handle as profile-less
+                navigate("/profile-setup");
             }
 
         } catch (err) {
+            console.error("Login process error:", err.message);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -91,9 +98,9 @@ const Login = () => {
                         />
                         
                         {error && (
-                            <p className="text-[#DD3131] text-[10px] font-black uppercase text-center bg-red-50 p-3 rounded-xl border border-red-100">
+                            <div className="text-[#DD3131] text-[10px] font-black uppercase text-center bg-red-50 p-4 rounded-xl border border-red-100 leading-relaxed">
                                 {error}
-                            </p>
+                            </div>
                         )}
 
                         <button 

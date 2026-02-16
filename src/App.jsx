@@ -21,12 +21,16 @@ import Signup from './components/Auth/Signup';
 import ChefOnboarding from './components/Chef/ChefOnboarding';
 import ChefDashboard from "./components/Chef/ChefDashboard";
 import ChefSettings from "./components/Chef/ChefSettings";
+import ChefMenuManager from "./components/Chef/ChefMenuManager"; // ADDED
 
 // Customer Pages (The Table)
-import FoodieHome from './components/Customer/FoodieHome';
+import MenuDiscovery from './components/Customer/MenuDiscovery'; 
+import FoodieHome from './components/Customer/FoodieHome';      
 import ChefPublicProfile from "./components/Customer/ChefPublicProfile"; 
 import MealPlanner from "./components/Customer/MealPlanner";
 import CustomerProfile from "./components/Customer/CustomerProfile";
+import CheckoutSchedule from "./components/Customer/CheckoutSchedule"; 
+import OrderHistory from "./components/Customer/OrderHistory"; 
 import PaymentSuccess from './components/Customer/PaymentSuccess';
 
 // Admin
@@ -68,7 +72,7 @@ const LandingPage = () => (
 
 function App() {
   useEffect(() => {
-    document.title = "Qavaeat | Effortless Meal Planning";
+    document.title = "Qavaeat | The Digital Culinary Market";
   }, []);
 
   return (
@@ -86,21 +90,30 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup/:role" element={<Signup />} />
           
-          {/* Publicly viewable chef profiles for discovery */}
-          <Route path="/explore/:chefId" element={<ChefPublicProfile />} /> 
+          {/* Marketplace Discovery (Public) */}
+          <Route path="/explore" element={<MenuDiscovery />} /> 
+          
+          {/* Publicly viewable chef profiles */}
+          <Route path="/chef/:chefId" element={<ChefPublicProfile />} /> 
           
           {/* --- 2. Protected Chef Universe --- */}
           <Route element={<ProtectedRoute requiredRole="chef" />}>
              <Route path="/chef-onboarding" element={<ChefOnboarding />} />
              <Route path="/chef/dashboard/:chefId" element={<ChefDashboard />} />
              <Route path="/chef/settings/:chefId" element={<ChefSettings />} />
+             {/* NEW ROUTE FOR MENU MANAGEMENT */}
+             <Route path="/manage-meals" element={<ChefMenuManager />} />
           </Route>
 
           {/* --- 3. Protected Foodie Universe --- */}
           <Route element={<ProtectedRoute requiredRole="foodie" />}>
             <Route path="/foodie-home" element={<FoodieHome />} />
             <Route path="/plan" element={<MealPlanner />} />
-            <Route path="/profile" element={<CustomerProfile />} />
+            <Route path="/profile" element={<CustomerProfile />} /> 
+            
+            <Route path="/checkout/schedule" element={<CheckoutSchedule />} />
+            <Route path="/my-table/history" element={<OrderHistory />} />
+            
             <Route path="/payment-success" element={<PaymentSuccess />} />
           </Route>
 
@@ -120,15 +133,24 @@ function App() {
       </main>
 
       {/* FOOTER SECTION */}
-      <footer className="py-16 bg-[#0A0A0A] text-white border-t border-gray-900">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center">
-          <Link to="/" className="text-2xl font-black text-[#DD3131] tracking-tighter italic mb-4">QAVAEAT</Link>
-          <p className="text-sm text-gray-500 font-medium">© 2026 Qavaeat. Empowering local kitchens.</p>
-          
-          <div className="mt-8 flex flex-wrap justify-center gap-8 text-[10px] text-gray-400 uppercase tracking-widest font-black">
-             <Link to="/foodie-home" className="hover:text-white transition-colors">Find Food</Link>
-             <Link to="/auth" className="hover:text-white transition-colors">Become a Chef</Link>
-             <Link to="/login" className="text-[#DD3131] hover:text-red-400">Admin Portal</Link>
+      <footer className="py-24 bg-[#0A0A0A] text-white border-t border-gray-900">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center text-center md:text-left">
+            <div>
+              <Link to="/" className="text-3xl font-black text-[#DD3131] tracking-tighter italic">QAVAEAT</Link>
+              <p className="mt-4 text-xs text-gray-500 font-bold uppercase tracking-widest">Logistics for the Modern Kitchen.</p>
+            </div>
+            
+            <div className="flex justify-center gap-8 text-[10px] text-gray-400 uppercase tracking-[0.3em] font-black">
+               <Link to="/explore" className="hover:text-[#DD3131] transition-colors">Market</Link>
+               <Link to="/my-table/history" className="hover:text-[#DD3131] transition-colors">History</Link>
+               <Link to="/profile" className="hover:text-[#DD3131] transition-colors">Identity</Link>
+            </div>
+
+            <div className="md:text-right">
+              <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">© 2026 Qavaeat Platform</p>
+              <Link to="/admin-approval" className="text-[9px] text-gray-800 hover:text-[#DD3131] mt-2 block">System Access</Link>
+            </div>
           </div>
         </div>
       </footer>
