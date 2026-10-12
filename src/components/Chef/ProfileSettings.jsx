@@ -5,15 +5,15 @@ const ProfileSettings = () => {
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState({ business_name: '', bio: '', location: '', phone: '' });
 
-    useEffect(() => {
-        fetchProfile();
-    }, []);
-
     const fetchProfile = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         const { data } = await supabase.from('chefs').select('*').eq('user_id', user.id).single();
         if (data) setProfile(data);
     };
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
     const handleUpdate = async (e) => {
         e.preventDefault();

@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabaseClient';
 import { ClockIcon, CalendarIcon, MapPinIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 const CheckoutSchedule = () => {
     const navigate = useNavigate();
-    const [cartItems, setCartItems] = useState([]);
-    const [deliveryType, setDeliveryType] = useState('ASAP'); // 'ASAP' or 'Scheduled'
+    const [deliveryType, setDeliveryType] = useState('ASAP');
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedTime, setSelectedTime] = useState('');
     const [address, setAddress] = useState('');
@@ -22,10 +20,6 @@ const CheckoutSchedule = () => {
     });
 
     const timeSlots = ["08:00 AM", "12:00 PM", "02:00 PM", "06:00 PM", "08:00 PM"];
-
-    const calculateTotal = () => {
-        return cartItems.reduce((acc, item) => acc + (item.meals?.price || 0), 0);
-    };
 
     const handleConfirmOrder = async () => {
         if (!address) return alert("Please enter a delivery address");

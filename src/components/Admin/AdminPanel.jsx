@@ -12,12 +12,8 @@ import {
 const AdminApproval = () => {
   const [chefs, setChefs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
-  const [selectedChef, setSelectedChef] = useState(null); // For the Review Modal
-
-  useEffect(() => {
-    fetchChefs();
-  }, []);
+  const [activeTab, setActiveTab] = useState('pending');
+  const [selectedChef, setSelectedChef] = useState(null);
 
   const fetchChefs = async () => {
     setLoading(true);
@@ -25,6 +21,10 @@ const AdminApproval = () => {
     if (!error) setChefs(data || []);
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchChefs();
+  }, []);
 
   const updateChefStatus = async (chefId, status) => {
     const { error } = await supabase

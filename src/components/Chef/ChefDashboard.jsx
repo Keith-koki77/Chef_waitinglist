@@ -19,7 +19,7 @@ const ChefDashboard = () => {
 
   useEffect(() => {
     if (chefId) fetchDashboardData();
-  }, [chefId]);
+  }, [chefId, fetchDashboardData]);
 
   const fetchDashboardData = async () => {
     try {

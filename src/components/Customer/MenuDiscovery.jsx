@@ -9,10 +9,6 @@ const MenuDiscovery = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchChefs();
-  }, []);
-
   const fetchChefs = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -26,6 +22,10 @@ const MenuDiscovery = () => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchChefs();
+  }, []);
 
   useEffect(() => {
     const filtered = chefs.filter(

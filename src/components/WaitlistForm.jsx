@@ -59,7 +59,7 @@ export default function WaitlistForm({ type }) {
   if (submitted) return <Success onBack={() => setSubmitted(false)} />;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-lg clay-card p-8">
       <h3 className="text-2xl font-black text-q-dark">
         {type === 'chef' ? 'Chef Registration' : 'Foodie Early Access'}
       </h3>
@@ -69,7 +69,7 @@ export default function WaitlistForm({ type }) {
           name="email"
           type="email"
           placeholder="Email Address"
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary outline-none transition-all text-black"
+          className="clay-input w-full text-black placeholder-gray-400"
           required
           onChange={handleChange}
         />
@@ -78,7 +78,7 @@ export default function WaitlistForm({ type }) {
           <input
             name="business_name"
             placeholder="Business Name"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black outline-none"
+            className="clay-input w-full text-black placeholder-gray-400"
             required
             onChange={handleChange}
           />
@@ -87,7 +87,7 @@ export default function WaitlistForm({ type }) {
         <input
           name="location"
           placeholder="Location (e.g. Kilimani, Nairobi)"
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black outline-none"
+          className="clay-input w-full text-black placeholder-gray-400"
           required
           onChange={handleChange}
         />
@@ -103,10 +103,10 @@ export default function WaitlistForm({ type }) {
                 key={option}
                 type="button"
                 onClick={() => handleMultiSelect('food_type', option)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                className={`clay-button px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   formData.food_type.includes(option)
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-primary'
+                    ? 'bg-primary text-white shadow-[0_4px_10px_rgba(221,49,49,0.3)]'
+                    : 'text-gray-600 hover:bg-accent/50'
                 }`}
               >
                 {option} {formData.food_type.includes(option) ? '✓' : '+'}
@@ -125,10 +125,10 @@ export default function WaitlistForm({ type }) {
                   key={meal}
                   type="button"
                   onClick={() => handleMultiSelect('meal_times', meal)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                  className={`clay-button px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                     formData.meal_times.includes(meal)
-                      ? 'bg-accent border-accent text-q-dark'
-                      : 'bg-gray-50 border-gray-200 text-gray-500'
+                      ? 'bg-accent text-q-dark shadow-[0_4px_10px_rgba(244,205,46,0.3)]'
+                      : 'text-gray-500 hover:bg-primary/10'
                   }`}
                 >
                   {meal}
@@ -142,7 +142,7 @@ export default function WaitlistForm({ type }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-primary hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+        className="clay-button bg-primary text-white font-bold py-4 rounded-xl w-full hover:bg-red-700 shadow-[0_4px_15px_rgba(221,49,49,0.4)] disabled:opacity-50"
       >
         {loading ? "Registering..." : "Join the Waitlist"}
       </button>

@@ -10,13 +10,8 @@ import {
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
-  const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // 'all', 'active', 'completed'
-
-  useEffect(() => {
-    fetchHistory();
-  }, []);
+  const [filter, setFilter] = useState('all');
 
   const fetchHistory = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -37,6 +32,10 @@ const OrderHistory = () => {
     setOrders(orderData || []);
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pb-20">

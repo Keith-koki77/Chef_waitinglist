@@ -31,6 +31,13 @@ const ChefPlanManager = () => {
         setPlans(data || []);
     };
 
+    const deletePlan = async (planId) => {
+        const { error } = await supabase.from('menu_plans').delete().eq('id', planId);
+        if (!error) {
+            fetchPlans(chefId);
+        }
+    };
+
     const handleCreatePlan = async (e) => {
         e.preventDefault();
         setLoading(true);

@@ -35,10 +35,10 @@ const Login = () => {
 
             if (role === "chef") {
                 // FETCH CHEF RECORD
-                const { data: chef, error: chefError } = await supabase
+                const { data: chef } = await supabase
                     .from("chefs")
                     .select("*")
-                    .eq("id", user.id) // Matches Clean Slate SQL Primary Key
+                    .eq("id", user.id)
                     .maybeSingle();
 
                 console.log("Chef Debug Info:", { chef, userId: user.id });

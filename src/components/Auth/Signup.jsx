@@ -8,7 +8,6 @@ const Signup = () => {
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
     const [loading, setLoading] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
     const navigate = useNavigate();
 
@@ -19,7 +18,7 @@ const Signup = () => {
         setLoading(true);
         setErrorMsg(null);
 
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -41,27 +40,6 @@ const Signup = () => {
             }
         }
     };
-
-    if (isSuccess) {
-        return (
-            <div className="min-h-[90vh] flex items-center justify-center p-6">
-                <div className="max-w-md w-full p-12 rounded-[3.5rem] bg-white border-2 border-black text-center shadow-2xl animate-in fade-in zoom-in duration-300">
-                    <div className="text-6xl mb-6">📩</div>
-                    <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4">Check Your Email</h2>
-                    <p className="text-gray-500 font-bold text-sm uppercase leading-relaxed mb-8">
-                        Verification link sent to <span className="text-black">{email}</span>. 
-                        Verify to activate your <span className="text-[#DD3131]">{finalRole}</span> account.
-                    </p>
-                    <button 
-                        onClick={() => navigate('/login')}
-                        className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#DD3131] transition-all"
-                    >
-                        Go to Login
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-[90vh] flex items-center justify-center p-6">

@@ -16,13 +16,8 @@ const CustomerProfile = () => {
     address: '',
     preferences: []
   });
-  const [loading, setLoading] = useState(true);
 
   const dietTags = ["Vegan", "Halal", "Keto", "High Protein", "No Seafood", "Gluten Free"];
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   const fetchProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -30,8 +25,11 @@ const CustomerProfile = () => {
       // In your final sync, this will pull from a 'profiles' table
       setProfile(prev => ({ ...prev, email: user.email }));
     }
-    setLoading(false);
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const togglePreference = (tag) => {
     setProfile(prev => ({
